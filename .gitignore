@@ -1,0 +1,6 @@
+Vagrantfile
+.vagrant/
+/provision
+composer.json
+
+composer.lock
