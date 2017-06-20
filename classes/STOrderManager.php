@@ -1,7 +1,7 @@
 <?php
 // uses guzzleHTTP for all its curl requests to servertastic
 use GuzzleHttp\Client;
-
+use GuzzleHttp\Exception\ServerException;
 class STOrderManager {
 	public $error_log = [];
 	public $formdata;
@@ -252,11 +252,10 @@ class STOrderManager {
 		if ($this->error_log == []) {
 			if ($formdata['next_page'] == 'place_order') {
 				// do something else as we are now placing the order in full
-
-				$this->formdata->order_completion = $this->placeOrder();
-
-				header("Location:review.php?order_token=" . $this->formdata->order_token);
-			} else {
+				if ($this->placeOrder()) {
+                    header("Location:review.php?order_token=" . $this->formdata->order_token);
+                }
+            } else {
 				// use the relocate variable and fire on class destruction
 				header("Location:" . $formdata['next_page'] . ".php");
 			}
@@ -438,17 +437,18 @@ class STOrderManager {
 
 			if ($place_order->getStatusCode() == '200') {
 				if (!isset(json_decode($place_order->getBody(), true)['error'])) {
-					$returned = json_decode($place_order->getBody(), true);
+                    $this->formdata->order_completion = json_decode($place_order->getBody(), true);
 					// assumed complete order so proceed to pass information to view
-					return $returned;
+					return true;
 				} else {
 					// throw error returned from the place
 					array_push($this->error_log, json_decode($place_order->getBody(), true)['error']);
 				}
 			}
-		} catch (Exception $e) {
-			array_push($this->error_log, $e->getMessage());
+		} catch (ServerException $e) {
+			array_push($this->error_log, json_decode($e->getResponse()->getBody()->getContents(),true)['error']['message']);
 		}
+		return false;
 	}
 
 

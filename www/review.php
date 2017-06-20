@@ -145,7 +145,11 @@ if (isset($_GET['action']) && $_GET['action'] != '') {
 						<h4 class="panel-title">Private Key</h4>
 					</div>
 					<div class="panel-body">
-						<?=nl2br($order->formdata->order_completion['private_key']);?>
+            <code>
+              <pre>
+                <?=$order->formdata->order_completion['private_key'];?>
+              </pre>
+            </code>
 					</div>
 				</div>
 			<?php endif;?>
@@ -155,7 +159,11 @@ if (isset($_GET['action']) && $_GET['action'] != '') {
 						<h4 class="panel-title">CSR</h4>
 					</div>
 					<div class="panel-body">
-						<?=nl2br($order->formdata->order_completion['csr']);?>
+            <code>
+                <pre>
+                <?=$order->formdata->order_completion['csr'];?>
+                </pre>
+            </code>
 					</div>
 				</div>
 			<?php endif;?>
@@ -567,23 +575,40 @@ if (isset($_GET['action']) && $_GET['action'] != '') {
 									</div>
 									<div class="panel-body">
 										<div class="row">
-											<div class="col-md-6">
+											<div class="col-md-7">
 												<h4>Certificate</h4>
-												<p><?= $order->formdata->certificate ?></p>
+												<pre><?= $order->formdata->certificate ?></pre>
 											</div>
-											<div class="col-md-6">
+											<div class="col-md-5">
 												<h4>Expiry Date</h4>
 												<p><?= $order->formdata->expiry_date ?></p>
 											</div>
 										</div>
 										<div class="row">
-											<div class="col-md-6">
+											<div class="col-md-7">
 												<h4>PKCS7</h4>
-												<p><?= (isset($order->formdata->pkcs7)? $order->formdata->pkcs7 :'') ?></p>
+												<pre><?= (isset($order->formdata->pkcs7)? $order->formdata->pkcs7 :'') ?></pre>
 											</div>
 										</div>
 									</div>
 								</div>
+                <?php if (!empty($order->formdata->ca_certs->certificate_info)):?>
+                  <div class="panel panel-primary">
+                    <div class="panel-heading">
+                      <h3 class="panel-title">CA Certificates</h3>
+                    </div>
+                    <div class="panel-body">
+                        <?php foreach ($order->formdata->ca_certs->certificate_info as $cert):?>
+                            <div class="row">
+                              <div class="col-md-7">
+                                <h4><?= $cert->type ?></h4>
+                                <pre><?= $cert->certificate ?></pre>
+                              </div>
+                            </div>
+                        <?php endforeach;?>
+                    </div>
+                  </div>
+                <?php endif;?>
 							<?php endif; ?>
 							<div class="row">
 								<div class="col-sm-6">
