@@ -54,9 +54,13 @@
 </head>
 <body>
 	<div class="container header">
-		<div class="logo-area">
-			<img src="img/logo-placehold.png" width="300" height="150" alt="">
-		</div>
+	  <?php if (isset($order)): ?>
+	  <?php if ($order->hasLogo()):?>
+        <div class="logo-area">
+          <img src="<?= $order->logoLocation ?>">
+        </div>
+	  <?php endif;?>
+	  <?php endif;?>
 		<?php if (isset($order)): ?>
 			<?php if (isset($order->formdata->product_name)): ?>
 				<h2><?= $order->formdata->product_name ?></h2>

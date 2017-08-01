@@ -77,9 +77,11 @@ if (isset($_GET['action']) && $_GET['action'] != '') {
 </head>
 <body>
 	<div class="container header">
-		<div class="logo-area">
-			<img src="img/logo-placehold.png" width="300" height="150" alt="">
-		</div>
+	  <?php if ($order->hasLogo()):?>
+        <div class="logo-area">
+          <img src="<?= $order->logoLocation ?>">
+        </div>
+	  <?php endif;?>
 		<h2><?=$order->formdata->product_name;?></h2>
 		<?php if ($order->TEST_MODE): ?>
 			<p class="alert alert-danger">TEST MODE</p>
@@ -647,48 +649,7 @@ if (isset($_GET['action']) && $_GET['action'] != '') {
 													<?= $order->formdata->admin_contact_email ?>
 												</div>
 											<?php endif ?>
-											<?php if ($order->fieldIsAllowed('admin_contact_organisation_name')): ?>
-												<div class="admin_contact_organisation_name">
-													<strong>Organisation Name: </strong>
-													<?= $order->formdata->admin_contact_organisation_name ?>
-												</div>
-											<?php endif ?>
-											<?php if ($order->fieldIsAllowed('admin_contact_address_line1')): ?>
-												<div class="admin_contact_address_line1">
-													<strong>Address Line 1: </strong>
-													<?= $order->formdata->admin_contact_address_line1 ?>
-												</div>
-											<?php endif ?>
-											<?php if ($order->fieldIsAllowed('admin_contact_address_line2')): ?>
-												<div class="admin_contact_address_line2">
-													<strong>Address Line 2: </strong>
-													<?= $order->formdata->admin_contact_address_line2 ?>
-												</div>
-											<?php endif ?>
-											<?php if ($order->fieldIsAllowed('admin_contact_address_post_code')): ?>
-												<div class="admin_contact_address_post_code">
-													<strong>Postcode: </strong>
-													<?= $order->formdata->admin_contact_address_post_code ?>
-												</div>
-											<?php endif ?>
-											<?php if ($order->fieldIsAllowed('admin_contact_address_city')): ?>
-												<div class="admin_contact_address_city">
-													<strong>City: </strong>
-													<?= $order->formdata->admin_contact_address_city ?>
-												</div>
-											<?php endif ?>
-											<?php if ($order->fieldIsAllowed('admin_contact_address_region')): ?>
-												<div class="admin_contact_address_region">
-													<strong>Region: </strong>
-													<?= $order->formdata->admin_contact_address_region ?>
-												</div>
-											<?php endif ?>
-											<?php if ($order->fieldIsAllowed('admin_contact_address_country')): ?>
-												<div class="admin_contact_address_country">
-													<strong>Country: </strong>
-													<?= $order->formdata->admin_contact_address_country ?>
-												</div>
-											<?php endif ?>
+
 										</div>
 									</div>
 								</div>
@@ -728,54 +689,12 @@ if (isset($_GET['action']) && $_GET['action'] != '') {
 													<?= $order->formdata->tech_contact_email ?>
 												</div>
 											<?php endif ?>
-											<?php if ($order->fieldIsAllowed('tech_contact_organisation_name')): ?>
-												<div class="tech_contact_organisation_name">
-													<strong>Organisation Name: </strong>
-													<?= $order->formdata->tech_contact_organisation_name ?>
-												</div>
-											<?php endif ?>
-											<?php if ($order->fieldIsAllowed('tech_contact_address_line1')): ?>
-												<div class="tech_contact_address_line1">
-													<strong>Address Line 1: </strong>
-													<?= $order->formdata->tech_contact_address_line1 ?>
-												</div>
-											<?php endif ?>
-											<?php if ($order->fieldIsAllowed('tech_contact_address_line2')): ?>
-												<div class="tech_contact_address_line2">
-													<strong>Address Line 2: </strong>
-													<?= $order->formdata->tech_contact_address_line2 ?>
-												</div>
-											<?php endif ?>
-											<?php if ($order->fieldIsAllowed('tech_contact_address_post_code')): ?>
-												<div class="tech_contact_address_post_code">
-													<strong>Postcode: </strong>
-													<?= $order->formdata->tech_contact_address_post_code ?>
-												</div>
-											<?php endif ?>
-											<?php if ($order->fieldIsAllowed('tech_contact_address_city')): ?>
-												<div class="tech_contact_address_city">
-													<strong>City: </strong>
-													<?= $order->formdata->tech_contact_address_city ?>
-												</div>
-											<?php endif ?>
-											<?php if ($order->fieldIsAllowed('tech_contact_address_region')): ?>
-												<div class="tech_contact_address_region">
-													<strong>Region: </strong>
-													<?= $order->formdata->tech_contact_address_region ?>
-												</div>
-											<?php endif ?>
-											<?php if ($order->fieldIsAllowed('tech_contact_address_country')): ?>
-												<div class="tech_contact_address_country">
-													<strong>Country: </strong>
-													<?= $order->formdata->tech_contact_address_country ?>
-												</div>
-											<?php endif ?>
 										</div>
 								</div>
 								</div>
 							</div>
 							<?php if ($order->fieldIsAllowed('org_name')): ?>
-		
+
 								<div class="panel panel-primary organisation_details">
 									<div class="panel-heading">
 										<h4 class="panel-title">Organisation</h4>

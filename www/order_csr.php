@@ -14,9 +14,11 @@
 </head>
 <body>
 	<div class="container header">
-		<div class="logo-area">
-			<img src="img/logo-placehold.png" alt="">
-		</div>
+	  <?php if ($order->hasLogo()):?>
+        <div class="logo-area">
+          <img src="<?= $order->logoLocation ?>">
+        </div>
+	  <?php endif;?>
 		<h2><?= $order->formdata->product_name ?></h2>
 		<?php if ($order->TEST_MODE): ?>
 			<p class="alert alert-danger">TEST MODE</p>
@@ -75,7 +77,7 @@
 					</div>
 				</div>
 			<?php endif ?>
-			<?php if ($order->fieldIsAllowed('san_domains')): ?>
+			<?php if ($order->fieldIsAllowed('san_domains') && $order->formdata->san_count>0): ?>
 				<div class="form-group san_domains">
 					<label for=""><?= (isset($order->formdata->san_count)?$order->formdata->san_count:"") ?> SAN Domains (comma seperated): </label>
 					<textarea 

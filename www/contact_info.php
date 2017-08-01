@@ -15,10 +15,12 @@
 </head>
 <body>
 	<div class="container header">
-		<div class="logo-area">
-			<img src="img/logo-placehold.png" alt="">
-		</div>
-		<h2><?= $order->formdata->product_name ?></h2>
+	  <?php if ($order->hasLogo()):?>
+      <div class="logo-area">
+        <img src="<?= $order->logoLocation ?>">
+      </div>
+    <?php endif;?>
+    <h2><?= $order->formdata->product_name ?></h2>
 		<?php if ($order->TEST_MODE): ?>
 			<p class="alert alert-danger">TEST MODE</p>
 		<?php endif ?>
