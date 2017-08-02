@@ -447,12 +447,12 @@ class STOrderManager {
 
     public function hasLogo() {
     	// check for a cookie of logo location first
-	    if (isset($_COOKIE['logoLocation'])) {
+	    if (isset($_SESSION['logoLocation'])) {
 		    // if the cookie is set but empty, then we can assume the api returned no logo
-	    	if ($_COOKIE['logoLocation']==='false') {
+	    	if ($_SESSION['logoLocation']==='false') {
 	    		return false;
 		    }
- 		    $this->logoLocation = $_COOKIE['logoLocation'];
+ 		    $this->logoLocation = $_SESSION['logoLocation'];
 		    return true;
 	    }
 
@@ -460,25 +460,28 @@ class STOrderManager {
 	    if (!empty( $this->logoLocation)) {
 		    return true;
 	    } else {
-	    	// find the logo via the reseller API instead
-		    $logo_location=$this->client->get('clientlogo.json', [
-			    'query'=>[
-				    'order_token'=>$this->formdata->order_token,
-			    ]
-		    ]);
-		    if ($logo_location->getStatusCode()=='200') {
-			    $returned=json_decode($logo_location->getBody());
-			    if (isset($returned->success)) {
-				    // success returned
-				    // set the cookie so we do not need to fire this on every page,
-				    // only let it live for 10 minutes so we can keep the logo relatively up to date
-				    setcookie( 'logoLocation',$returned->url,time()+600);
-				    $this->logoLocation = $returned->url;
-				    return true;
-			    } else {
-			    	// set a false cookie as the api did not provide a logo
-				    setcookie( 'logoLocation','false',time()+600);
+	    	try {
+			    // find the logo via the reseller API instead
+			    $logo_location=$this->client->get('clientlogo.json', [
+				    'query'=>[
+					    'order_token'=>$this->formdata->order_token,
+				    ]
+			    ]);
+			    if ($logo_location->getStatusCode()=='200') {
+				    $returned=json_decode($logo_location->getBody());
+				    if (isset($returned->success)) {
+					    // success returned
+					    // set the cookie so we do not need to fire this on every page,
+					    // only let it live for 10 minutes so we can keep the logo relatively up to date
+					    $_SESSION['logoLocation'] = filter_var($returned->url,FILTER_SANITIZE_URL);
+					    $this->logoLocation = filter_var($returned->url,FILTER_SANITIZE_URL);
+					    return true;
+				    } else {
+					    // set a false cookie as the api did not provide a logo
+					    $_SESSION['logoLocation'] = 'false';
+				    }
 			    }
+		    } catch (Exception $e) {
 		    }
 	    }
 	    return FALSE;
