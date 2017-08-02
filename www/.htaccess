@@ -1,0 +1,4 @@
+RewriteEngine On
+RewriteCond %{REQUEST_URI} ^/token/(.*)$
+RewriteRule ^token/(.*)$ /?order_token=$1 [R=302]
+
