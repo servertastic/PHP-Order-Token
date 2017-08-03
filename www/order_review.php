@@ -26,7 +26,7 @@ include_once 'includes/header.php';
     <?php endif ?>
 </div>
 <ol class="container breadcrumb">
-  <li><a href="/order">Start</a></li>
+  <li><a href="/">Start</a></li>
   <?php if ($order->isSmarterTools()):?>
       <li><a href="order_smartertools.php">SmarterTools Email</a></li>
   <?php else:?>

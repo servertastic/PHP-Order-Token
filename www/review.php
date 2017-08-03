@@ -83,7 +83,7 @@ if (isset($_GET['action']) && $_GET['action'] != '') {
 		<?php endif ?>
 	</div>
 	<ol class="container breadcrumb">
-		<li><a href="/order" class="">Start</a></li>
+		<li><a href="/" class="">Start</a></li>
 		<li><a href="contact_info.php" class="active">Review</a></li>
 	</ol>
 	<?php if (isset($order)): ?>

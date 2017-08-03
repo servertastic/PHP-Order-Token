@@ -26,7 +26,7 @@ include_once 'includes/header.php';
     <?php endif ?>
 </div>
 <ol class="container breadcrumb">
-  <li><a href="/order">Start</a></li>
+  <li><a href="/">Start</a></li>
   <li><a href="order_type.php" class="">Order Type</a></li>
   <li><a href="contact_info.php" class="">Contact Information</a></li>
   <li><a href="order_csr.php" class="">CSR</a></li>

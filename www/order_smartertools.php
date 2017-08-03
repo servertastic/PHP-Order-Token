@@ -28,7 +28,7 @@ if (!$order->isSmarterTools()) {
 	<?php endif ?>
 </div>
 <ol class="container breadcrumb">
-	<li><a href="/order">Start</a></li>
+	<li><a href="/">Start</a></li>
 	<li><a href="order_type.php" class="active">SmarterTools Email</a></li>
 	<li><a href="order_review.php" class="unlinked">Review</a></li>
 </ol>
