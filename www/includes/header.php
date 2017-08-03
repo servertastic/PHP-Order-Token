@@ -6,7 +6,7 @@
 
 
 	// need to check if the user is allowed to proceed
-	if ($_SERVER['SCRIPT_NAME'] != '/order/index.php') {
+	if ($_SERVER['SCRIPT_NAME'] != '/index.php') {
 		// if on index then no need to check
 		if (isset($_SESSION['st_webform']['order_token'])) {
 			// build the class with session data
@@ -18,7 +18,7 @@
 				$order = new STOrderManager($_SESSION['st_webform']['order_token']);
 			}
 			if (!empty($order->formdata->error_log)) {
-				header("Location:/order");
+				header("Location:/");
 			}
 			if (isset($_POST['page_submit'])&&$_POST['page_submit']) {
 				if ($order->processFormData($_POST)) {
