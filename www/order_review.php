@@ -57,7 +57,7 @@ include_once 'includes/header.php';
   <div class="panel panel-primary">
     <div class="panel-body">
       <div class="product_name"><strong>Product: </strong><?= $order->formdata->product_name ?></div>
-      <div class="unique-reference"><strong>Unique Reference: </strong><?= $order->formdata->reseller_order_id ?></div>
+      <div class="unique-reference"><strong>Unique Reference: </strong><?= $order->formdata->reseller_unique_reference ?></div>
 	    <?php if ($order->isSmarterTools()):?>
         <div class="smartertools_email"><strong>Smartertools Email: </strong><?= $order->formdata->smartertools_email ?></div>
       <?php else:?>

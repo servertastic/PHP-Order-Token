@@ -63,6 +63,9 @@ include_once 'includes/header.php';
                 class="form-control"
                 data-validetta="<?= $order->fieldHasRequired('org_name') ?>"
                 value="<?= $order->populateFormField('org_name') ?>"
+	            <?php if (!empty($order->formdata->csr)):?>
+                  readonly=""
+	            <?php endif;?>
             >
           </div>
         </div>
@@ -96,6 +99,9 @@ include_once 'includes/header.php';
                 class="form-control"
                 data-validetta="<?= $order->fieldHasRequired('org_division') ?>"
                 value="<?= $order->populateFormField('org_division') ?>"
+	            <?php if (!empty($order->formdata->csr)):?>
+                  readonly=""
+	            <?php endif;?>
             >
           </div>
         </div>
@@ -282,6 +288,9 @@ include_once 'includes/header.php';
                 class="form-control"
                 data-validetta="<?= $order->fieldHasRequired('org_address_city') ?>"
                 value="<?= $order->populateFormField('org_address_city') ?>"
+	            <?php if (!empty($order->formdata->csr)):?>
+                  readonly=""
+	            <?php endif;?>
             >
           </div>
         </div>
@@ -297,6 +306,9 @@ include_once 'includes/header.php';
                 class="form-control"
                 data-validetta="<?= $order->fieldHasRequired('org_address_region') ?>"
                 value="<?= $order->populateFormField('org_address_region') ?>"
+	            <?php if (!empty($order->formdata->csr)):?>
+                  readonly=""
+	            <?php endif;?>
             >
           </div>
         </div>
@@ -320,18 +332,27 @@ include_once 'includes/header.php';
         <div class="row">
           <div class="form-group col-md-6">
             <label for="org_address_country">Country</label>
-            <select
-                name="org_address_country"
-                id="org_address_country"
-                class="form-control"
-                data-validetta="<?= $order->fieldHasRequired('org_address_country') ?>"
-            >
-              <option selected disabled hidden style='display: none' value=''></option>
-                <?php foreach ($order->iso_codes as $value): ?>
-                  <option <?= $order->isSelected("org_address_country", $value['code']) ?>
-                      value="<?= $value['code'] ?>"><?= $value['name'] ?></option>
-                <?php endforeach ?>
-            </select>
+	          <?php if (empty($order->formdata->csr)):?>
+                <select
+                    name="org_address_country"
+                    id="org_address_country"
+                    class="form-control"
+                    data-validetta="<?= $order->fieldHasRequired('org_address_country') ?>"
+                >
+                  <option selected disabled hidden style='display: none' value=''></option>
+		            <?php foreach ($order->iso_codes as $value): ?>
+                      <option <?= $order->isSelected("org_address_country", $value['code']) ?>
+                          value="<?= $value['code'] ?>"><?= $value['name'] ?></option>
+		            <?php endforeach ?>
+
+                </select>
+	          <?php else:?>
+		          <?php foreach ($order->iso_codes as $value):?>
+			          <?php if($order->isSelected("org_address_country",$value['code'])): ?>
+                    <p><?= $value['name'] ?></p>
+			          <?php endif; ?>
+		          <?php endforeach;?>
+	          <?php endif;?>
           </div>
         </div>
       <?php endif ?>

@@ -24,7 +24,7 @@ if (isset($_GET['action']) && $_GET['action'] != '') {
 		$action_fire = $order->cancelOrder();
 		// set alert response here
 		if ($action_fire) {
-			$action_response = "Your order cancellation request has been sent";
+			$action_response = "Your order cancellation request has been sent. It may take a few minutes to update.";
 		}
 		break;
 	case 'change_auth':
@@ -99,22 +99,22 @@ if (isset($_GET['action']) && $_GET['action'] != '') {
 			</div>
 		<?php endif;?>
 	<?php endif;?>
-	<?php if (isset($order->formdata->order_completion)&&$order->formdata->order_status!='Completed'): ?>
+	<?php if (isset($order->formdata->order_completion)&&$order->formdata->order_status=='Order Placed'): ?>
 		<div class="container">
 			<div class="page-header">
 				<h1>Order Completed</h1>
 			<?php if (isset($order->formdata->order_completion['private_key']) && isset($order->formdata->order_completion['csr'])): ?>
-				<p class="alert alert-danger">Please take a copy your CSR and Private Key and keep them safe, we will not store them and they cannot be retrieved from this system.</p>
+				<p class="alert alert-danger">Please take a copy of your Private Key and keep it safe, we will not store it and it cannot be retrieved from this system in the future. You can check the status of your order by clicking Check Status. It may take a few minutes for updated information to appear.</p>
 				<?php elseif (isset($order->formdata->order_completion['private_key'])): ?>
-				    <p class="alert alert-danger">Please take a copy your Private Key and keep it safe, we will not store them and they cannot be retrieved from this system.</p>
+				    <p class="alert alert-danger">Please take a copy of your Private Key and keep it safe, we will not store it and it cannot be retrieved from this system in the future. You can check the status of your order by clicking Check Status. It may take a few minutes for updated information to appear.</p>
 				<?php elseif (isset($order->formdata->order_completion['csr'])): ?>
-				    <p class="alert alert-danger">Please take a copy your CSR and keep it safe, we will not store them and they cannot be retrieved from this system.</p>
+				    <p class="alert alert-danger">Your order has been placed using the CSR you supplied below. You can check the status of your order by clicking Check Status. It may take a few minutes for updated information to appear.</p>
 			<?php endif;?>
 			</div>
 			<div class="panel panel-default">
 				<div class="panel-body">
 					<a href="<?= $_SERVER['PHP_SELF'] ?>?forcerefresh" class="btn btn-success">
-					  Check Token Status
+					  Check Status
 					</a>
 				</div>
 			</div>
@@ -582,7 +582,7 @@ if (isset($_GET['action']) && $_GET['action'] != '') {
 											<p><?=$order->formdata->domain_name;?></p>
 										</div>
 										<div class="col-md-6">
-											<h4>CA Order ID</h4>
+											<h4>Provider Order ID</h4>
 											<p><?= $order->formdata->provider_order_id ?></p>
 										</div>
 									</div>
@@ -592,6 +592,14 @@ if (isset($_GET['action']) && $_GET['action'] != '') {
 											<p><?= $order->formdata->approver_email_address ?></p>
 										</div>
 									</div>
+                  <?php if($order->fieldIsAllowed('san_domains')&&(int)$order->formdata->san_count>0): ?>
+                    <div class="row">
+                      <div class="col-md-12">
+                        <h4>San Domains</h4>
+                        <p><?= $order->formdata->additional_sans ?></p>
+                      </div>
+                    </div>
+					        <?php endif; ?>
 								</div>
 							</div>
 							<?php if ($order->formdata->order_status == 'Completed'): ?>
