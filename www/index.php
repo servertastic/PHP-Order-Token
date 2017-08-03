@@ -1,6 +1,6 @@
-<?php  
+<?php
 	include_once 'includes/header.php';
-	
+
 	// check if the page has been submitted
 	if (isset($_POST['indexsub'])) {
 		// start to build the form
@@ -8,19 +8,29 @@
 
 		// if no errors then go to the first step
 		if (empty($order->error_log)) {
+		if ($order->isSmarterTools()) {
+			// send these to a different page as they do not follow the same process
+			header('Location:order_smartertools.php');
+			die();
+		}
 			// check that the order hasnt already been tested before
 			header('Location:order_type.php');
 			die();
 			// if ($order->checkTokenStatus($_POST['order_token'])) {
 			// 	die();
 			// }
-				
+
 		}
 	} elseif (isset($_GET['order_token'])) {
 		// check if the user hasnt stored the order token in the get request
 		$order = new STOrderManager($_GET['order_token'],true);
 
 		if (empty($order->error_log)) {
+		  if ($order->isSmarterTools()) {
+        // send these to a different page as they do not follow the same process
+        header('Location:order_smartertools.php');
+          die();
+      }
 			header('Location:order_type.php');
 			die();
 			// if ($order->checkTokenStatus($_GET['order_token'])) {
@@ -30,7 +40,7 @@
 	} elseif (isset($_SESSION['st_webform'])&&!empty($_SESSION['st_webform'])) {
 		if (isset($_SESSION['st_webform']['order_completion'])) {
 			// destruct the session here as they have gone back to start after completing the order
-			
+
 			// keep the orderkey just incase they are looking to check authentication
 			$orderkey = $_SESSION['st_webform']['order_token'];
 			unset($_SESSION['st_webform']);

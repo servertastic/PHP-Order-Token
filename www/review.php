@@ -1,11 +1,6 @@
 <?php include 'includes/header.php';?>
 <?php
 
-if (isset($_GET['forcerefresh'])) {
-	// specifically for review if the get parameters calls for a force refresh.
-	// then remake the order manager with newly gathered info
-	$order = new STOrderManager($_SESSION['st_webform']['order_token'],true);
-}
 
 // if get actions are set. check here for here they are going
 if (isset($_GET['action']) && $_GET['action'] != '') {
@@ -88,7 +83,7 @@ if (isset($_GET['action']) && $_GET['action'] != '') {
 		<?php endif ?>
 	</div>
 	<ol class="container breadcrumb">
-		<li><a href="/" class="">Start</a></li>
+		<li><a href="/order" class="">Start</a></li>
 		<li><a href="contact_info.php" class="active">Review</a></li>
 	</ol>
 	<?php if (isset($order)): ?>
@@ -104,7 +99,7 @@ if (isset($_GET['action']) && $_GET['action'] != '') {
 			</div>
 		<?php endif;?>
 	<?php endif;?>
-	<?php if (isset($order->formdata->order_completion)): ?>
+	<?php if (isset($order->formdata->order_completion)&&$order->formdata->order_status!='Completed'): ?>
 		<div class="container">
 			<div class="page-header">
 				<h1>Order Completed</h1>
@@ -176,10 +171,39 @@ if (isset($_GET['action']) && $_GET['action'] != '') {
 					<p class="alert alert-info"><?=$action_response;?></p>
 				</div>
 			<?php endif;?>
+  <?php if($order->isSmarterTools()): ?>
+      <div class="container">
+        <div class="page-header">
+          <h2>Your Order is <?=$order->formdata->order_status;?></h2>
+        </div>
+        <div class='panel panel-primary'>
+          <div class='panel-body'>
+            <p>Congratulations! Your order has been completed. </p>
+          </div>
+        </div>
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h2 class="panel-title">Licence Details</h2>
+          </div>
+          <div class="panel-body">
+	          <?php foreach ( $order->formdata->orders_licenses->license as $item ):?>
+                <div class="smartertool_bundle">
+                  <h3><?= $item->product_name ?></h3>
+                  <p><?= $item->license_key ?></p>
+                  <h4>SmarterTools Email</h4>
+                  <p><?= $item->smartertools_email ?></p>
+                </div>
+	          <?php endforeach;?>
+          </div>
+        </div>
+      </div>
+
+	  <?php else:?>
 				<div class="container">
 					<div class="page-header">
 						<h2>Your Order is <?=$order->formdata->order_status;?></h2>
 					</div>
+
 					<?php if ($order->formdata->order_status == 'Completed'): ?>
 						<div class='panel panel-primary'>
 							<div class='panel-body'>
@@ -802,5 +826,6 @@ if (isset($_GET['action']) && $_GET['action'] != '') {
 	<?php endif;?>
 	<script type="text/javascript" src="js/vendor/jquery-3.1.1.min.js"></script>
 	<script type="text/javascript" src="js/vendor/bootstrap.min.js"></script>
+			<?php endif; ?>
 </body>
 </html>

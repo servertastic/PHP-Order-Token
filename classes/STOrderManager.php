@@ -7,7 +7,23 @@ class STOrderManager {
     public $error_log=[];
     public $formdata;
     public $TEST_MODE;
-    public $business_categories=[
+	private $smartertools_orders = [
+		'SmarterBundle',
+		'SmarterMailPro',
+		'SmarterMailEnt',
+		'SmarterStatsPro',
+		'SmarterStatsEnt',
+		'SmarterTrackPro',
+		'SmarterTrackEnt',
+		'SmarterToolsSingleEmailIncident',
+		'SmarterToolsSinglePhoneIncident',
+		'SmarterToolsSingleCriticalIncident',
+		'SmarterToolsSilverPackage',
+		'SmarterToolsGoldPackage',
+		'SmarterToolsPlatinumPackage',
+		'SmarterToolsInstallationSupport'
+	];
+	public $business_categories=[
         [
             'code'=>'b',
             'name'=>'Private Organization',
@@ -22,7 +38,7 @@ class STOrderManager {
         ],
     ];
 
-    public function __construct($order_token='', $force_review=FALSE) {
+	public function __construct($order_token='', $force_review=FALSE) {
         // OPTIONS //
         // 20 minutes in seconds
         $this->timeout='1200';
@@ -110,7 +126,7 @@ class STOrderManager {
 
     private function reviewToken($force_refresh=FALSE) {
         // normally do not keep calling review for info but if forced is set to true then do it.
-        if (isset($this->formdata->order_status)&&$this->formdata->order_status!=''&&$this->formdata&& ! $force_refresh) {
+        if (isset($this->formdata->order_status)&&$this->formdata->order_status!=''&&$this->formdata&& !$force_refresh) {
             // order is already reviewed so dont call the api again
             if ($this->formdata->order_status!='Order Placed') {
                 if (basename($_SERVER['PHP_SELF'])!='review.php'&&basename($_SERVER['PHP_SELF'])!='index.php') {
@@ -126,7 +142,6 @@ class STOrderManager {
                 ]);
                 if ($token_review->getStatusCode()=='200') {
                     $returned=json_decode($token_review->getBody());
-
                     // loop through all data and add it to the formdata session storage
                     foreach ($returned as $key=>$value) {
                         // skip over anything we dont need in the session
@@ -171,12 +186,15 @@ class STOrderManager {
                         return TRUE;
                     } else {
                         $this->getAppoverList();
+	                    if ($force_refresh) {
+		                    $this->storeAll();
+	                    }
                         header('Location:review.php');
                     }
                 }
-            } catch (Exception $e) {
+            } catch (\GuzzleHttp\Exception\RequestException $e) {
                 // array_push($this->error_log, 'Invalid Order Token, Please check it and try again.');
-                array_push($this->error_log, $e->getMessage());
+//                array_push($this->error_log, $e->getMessage());
             }
         }
     }
@@ -195,7 +213,7 @@ class STOrderManager {
 
                     return TRUE;
                 }
-            } catch (Exception $e) {
+            } catch (\GuzzleHttp\Exception\RequestException $e) {
                 array_push($this->error_log, $e->getMessage());
             }
         }
@@ -225,7 +243,7 @@ class STOrderManager {
 
                 return $decoded_array;
             }
-        } catch (Exception $e) {
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
             array_push($this->error_log, $e->getMessage());
         }
     }
@@ -286,7 +304,7 @@ class STOrderManager {
                 } else {
                     return FALSE;
                 }
-            } catch (Exception $e) {
+            } catch (\GuzzleHttp\Exception\RequestException $e) {
                 // array_push($this->error_log, 'Error trying to send resend email request');
                 array_push($this->error_log, $e->getMessage());
             }
@@ -316,7 +334,7 @@ class STOrderManager {
                 } else {
                     array_push($this->error_log, 'Error trying to send resend email request');
                 }
-            } catch (Exception $e) {
+            } catch (\GuzzleHttp\Exception\RequestException $e) {
                 array_push($this->error_log, 'Error trying to send resend email request');
             }
         } else {
@@ -342,7 +360,7 @@ class STOrderManager {
             } else {
                 return FALSE;
             }
-        } catch (Exception $e) {
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
             array_push($this->error_log, 'Error trying to send cancel order request');
         }
     }
@@ -368,7 +386,7 @@ class STOrderManager {
             } else {
                 return FALSE;
             }
-        } catch (Exception $e) {
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
             array_push($this->error_log, 'Error trying to send change auth method request');
         }
     }
@@ -391,7 +409,7 @@ class STOrderManager {
             } else {
                 return FALSE;
             }
-        } catch (Exception $e) {
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
             array_push($this->error_log, 'Error trying to send poll order request');
             array_push($this->error_log, $e->getMessage());
         }
@@ -481,7 +499,7 @@ class STOrderManager {
 					    $_SESSION['logoLocation'] = 'false';
 				    }
 			    }
-		    } catch (Exception $e) {
+		    } catch (\GuzzleHttp\Exception\RequestException $e) {
 		    }
 	    }
 	    return FALSE;
@@ -497,7 +515,7 @@ class STOrderManager {
 
                 return $this->iso_codes;
             }
-        } catch (Exception $e) {
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
             array_push($this->error_log, 'Error trying to get ISO Codes');
         }
     }
@@ -570,15 +588,55 @@ class STOrderManager {
                         $this->formdata->org_address_country=$returned->Country;
                     }
                 }
-            } catch (Exception $e) {
+            } catch (\GuzzleHttp\Exception\RequestException $e) {
                 array_push($this->error_log, $e->getMessage());
             }
         } else {
             return FALSE;
         }
+	    return false;
+    }
+
+	/**
+	 * @return bool
+	 */
+	public function isSmarterTools() {
+    	if (in_array(explode('-',$this->formdata->st_product_code)[0] , $this->smartertools_orders)) {
+    		return true;
+	    }
+	    return false;
+    }
+
+    private function placeSmarterTools() {
+		try {
+			$place_order=$this->client->post('place.json', [
+				'form_params' => [
+					'smartertools_email' => (isset($this->formdata->smartertools_email) ? $this->formdata->smartertools_email : ''),
+					'order_token' => (isset($this->formdata->order_token) ? $this->formdata->order_token : '')
+				]
+			]);
+
+			if ($place_order->getStatusCode()=='200') {
+				if ( ! isset(json_decode($place_order->getBody(), TRUE)['error'])) {
+					$this->formdata->order_completion=json_decode($place_order->getBody(), TRUE);
+					// we want to review the token again as its instant
+					$this->reviewToken(true);
+					return TRUE;
+				} else {
+					// throw error returned from the place
+					array_push($this->error_log, json_decode($place_order->getBody(), TRUE)['error']);
+				}
+			}
+		} catch (\GuzzleHttp\Exception\RequestException $e) {
+			array_push($this->error_log, json_decode($e->getResponse()->getBody()->getContents(), TRUE)['error']['message']);
+		}
+		return FALSE;
     }
 
     private function placeOrder() {
+		if ($this->isSmarterTools()) {
+			return $this->placeSmarterTools();
+		}
         if ($this->formdata->approver_email_address==''|| ! isset($this->formdata->approver_email_address)) {
             $this->formdata->approver_email_address=$this->formdata->approver_list[0]['email'];
         }
@@ -674,7 +732,7 @@ class STOrderManager {
                     array_push($this->error_log, json_decode($place_order->getBody(), TRUE)['error']);
                 }
             }
-        } catch (ServerException $e) {
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
             array_push($this->error_log, json_decode($e->getResponse()->getBody()->getContents(), TRUE)['error']['message']);
         }
 

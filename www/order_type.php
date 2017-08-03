@@ -25,7 +25,7 @@
 		<?php endif ?>
 	</div>
 	<ol class="container breadcrumb">
-		<li><a href="/">Start</a></li>
+		<li><a href="/order">Start</a></li>
 		<li><a href="order_type.php" class="active">Order Type</a></li>
 		<li><a href="contact_info.php" class="unlinked">Contact Information</a></li>
 		<li><a href="order_csr.php" class="unlinked">CSR</a></li>
