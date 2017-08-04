@@ -1,6 +1,6 @@
 <?php
-	require("../../vendor/autoload.php");
-	require("../../classes/STOrderManager.php");
+	require("../vendor/autoload.php");
+	require("../classes/STOrderManager.php");
 
 	session_start();
 
@@ -29,7 +29,7 @@
 				}
 			}
 		} else {
-			header("Location:/order");
+			header("Location:/");
 			die();
 		}
 	}

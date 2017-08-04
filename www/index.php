@@ -64,6 +64,11 @@
 </head>
 <body>
 	<div class="container header">
+	<?php if ($_SERVER['HTTP_HOST']=='order.servertastic.com'){?>
+	<div class="logo-area">
+	<img src="https://www.servertastic.com/wp-content/uploads/cropped-servertastic-360x60.png">
+	 </div>
+	<?php }else{ ?>
 	  <?php if (isset($order)): ?>
 	  <?php if ($order->hasLogo()):?>
         <div class="logo-area">
@@ -71,6 +76,7 @@
         </div>
 	  <?php endif;?>
 	  <?php endif;?>
+	  <?php };?>
 		<?php if (isset($order)): ?>
 			<?php if (isset($order->formdata->product_name)): ?>
 				<h2><?= $order->formdata->product_name ?></h2>

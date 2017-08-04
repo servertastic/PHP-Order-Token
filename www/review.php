@@ -31,7 +31,7 @@ if (isset($_GET['action']) && $_GET['action'] != '') {
 		$action_fire = $order->changeAuth();
 		// set alert response here
 		if ($action_fire) {
-			$action_response = "Your authorization method has now been changed";
+			$action_response = "Your authorization method has now been changed. It may take a few minutes to update.";
 		}
 		break;
 	case 'poll_auth':
@@ -142,11 +142,9 @@ if (isset($_GET['action']) && $_GET['action'] != '') {
 						<h4 class="panel-title">Private Key</h4>
 					</div>
 					<div class="panel-body">
-            <code>
-              <pre>
-                <?=$order->formdata->order_completion['private_key'];?>
-              </pre>
-            </code>
+						<pre>
+						<?= trim($order->formdata->order_completion['private_key'],' \t\n\r\0\x0B');?>
+						</pre>
 					</div>
 				</div>
 			<?php endif;?>
@@ -156,11 +154,9 @@ if (isset($_GET['action']) && $_GET['action'] != '') {
 						<h4 class="panel-title">CSR</h4>
 					</div>
 					<div class="panel-body">
-            <code>
-                <pre>
-                <?=$order->formdata->order_completion['csr'];?>
-                </pre>
-            </code>
+						<pre>
+						<?= trim($order->formdata->order_completion['csr'],' \t\n\r\0\x0B');?>
+						</pre>
 					</div>
 				</div>
 			<?php endif;?>

@@ -398,9 +398,7 @@ include_once 'includes/header.php';
 			  <?php if ($order->fieldIsAllowed('csr')): ?>
               <div class="csr">
                 <strong>CSR: </strong>
-                <p>
-					<?= $order->formdata->csr ?>
-                </p>
+					<pre><?= trim($order->formdata->csr,' ') ?></pre>
               </div>
 			  <?php endif ?>
 		  <?php endif ?>

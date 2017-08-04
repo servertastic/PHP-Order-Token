@@ -60,7 +60,7 @@
 			<?php if ($order->fieldIsAllowed('competitive_upgrade')): ?>
 				<div class="radio competitive">
 					<label>
-						<input type="radio" name="order_type" value="upg" id="competitive_upgrade" data-validetta="required" <?= (isset($order->formdata->order_type) && $order->formdata->order_type == 'upg'?'checked': '')?>>
+						<input type="radio" name="order_type" value="competitive_upgrade" id="competitive_upgrade" data-validetta="required" <?= (isset($order->formdata->order_type) && $order->formdata->order_type == 'competitive_upgrade'?'checked': '')?>>
 						Competitive Upgrade
 					</label>
 					<p>Select this option if you have an existing certificate from GoDaddy, GlobalSign or Comodo. You might be entitled to up to 12 months free.</p>
@@ -69,7 +69,7 @@
 			<?php if ($order->fieldIsAllowed('renewal')): ?>
 				<div class="radio renewal">
 					<label for="ren">
-						<input type="radio" name="order_type" value="ren" id="renewal" data-validetta="required" <?= (isset($order->formdata->order_type) && $order->formdata->order_type == 'ren'?'checked': '')?>>
+						<input type="radio" name="order_type" value="renewal" id="renewal" data-validetta="required" <?= (isset($order->formdata->order_type) && $order->formdata->order_type == 'renewal'?'checked': '')?>>
 						Renewal
 					</label>
 					<p>Select this option if you are renewing an order for the exact same domain (must be within 90 days of expiry).</p>
