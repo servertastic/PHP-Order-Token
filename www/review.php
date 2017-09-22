@@ -1,7 +1,6 @@
 <?php include 'includes/header.php';?>
 <?php
 
-
 // if get actions are set. check here for here they are going
 if (isset($_GET['action']) && $_GET['action'] != '') {
 	$action = $_GET['action'];
@@ -28,7 +27,7 @@ if (isset($_GET['action']) && $_GET['action'] != '') {
 		}
 		break;
 	case 'change_auth':
-		$action_fire = $order->changeAuth();
+		$action_fire = $order->changeAuth($_GET['email']);
 		// set alert response here
 		if ($action_fire) {
 			$action_response = "Your authorization method has now been changed. It may take a few minutes to update.";
@@ -38,6 +37,9 @@ if (isset($_GET['action']) && $_GET['action'] != '') {
 		$action_fire = $order->pollAuth();
 		// set alert response here
 		if ($action_fire) {
+		  if (!isset($action_fire->status)) {
+		    $action_fire->status = '';
+      }
 			$action_response = "Order has been polled: $action_fire->status";
 		}
 		break;
@@ -69,8 +71,14 @@ if (isset($_GET['action']) && $_GET['action'] != '') {
 	<link rel="stylesheet" href="css/vendor/bootstrap.css">
 	<link rel="stylesheet" href="css/main-style.css">
 	<link rel="stylesheet" href="css/user-style.css">
+	<?php  
+	include_once 'includes/headtag.php';
+	?>
 </head>
 <body>
+	<?php  
+	include_once 'includes/bodytagtop.php';
+	?>
 	<div class="container header">
 	  <?php if ($order->hasLogo()):?>
         <div class="logo-area">
@@ -142,9 +150,7 @@ if (isset($_GET['action']) && $_GET['action'] != '') {
 						<h4 class="panel-title">Private Key</h4>
 					</div>
 					<div class="panel-body">
-						<pre>
-						<?= trim($order->formdata->order_completion['private_key'],' \t\n\r\0\x0B');?>
-						</pre>
+						<pre><?= trim($order->formdata->order_completion['private_key'],' \t\n\r\0\x0B');?></pre>
 					</div>
 				</div>
 			<?php endif;?>
@@ -154,9 +160,7 @@ if (isset($_GET['action']) && $_GET['action'] != '') {
 						<h4 class="panel-title">CSR</h4>
 					</div>
 					<div class="panel-body">
-						<pre>
-						<?= trim($order->formdata->order_completion['csr'],' \t\n\r\0\x0B');?>
-						</pre>
+						<pre><?= trim($order->formdata->order_completion['csr'],' \t\n\r\0\x0B');?></pre>
 					</div>
 				</div>
 			<?php endif;?>
@@ -209,10 +213,18 @@ if (isset($_GET['action']) && $_GET['action'] != '') {
 
 						<div class="panel panel-default">
 							<div class="panel-body">
+                <a href="<?= $_SERVER['PHP_SELF'] ?>?forcerefresh" class="btn btn-success">
+                  Refresh
+                </a>
 								<!-- Button trigger modal -->
 								<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ResendFulfillment">
 								  Resend Fulfillment Email
 								</button>
+                                <?php if($order->checkCancelEligibility()): ?>
+                                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#CancelOrder">
+                                    Cancel Order
+                                </button>
+                                <?php endif; ?>
 							</div>
 						</div>
 
@@ -229,13 +241,83 @@ if (isset($_GET['action']) && $_GET['action'] != '') {
 								      </div>
 								      <div class="modal-footer">
 								        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-								        <a href="<?= $_SERVER['PHP_SELF']."?action=resend&email_type=fulfillment" ?>" class="btn btn-primary">Confirm</a>
+								        <a href="<?= $_SERVER['PHP_SELF']."?action=resend&email_type=Fulfillment" ?>" class="btn btn-primary">Confirm</a>
 								      </div>
 								    </div>
 								  </div>
 								</div>
 								<!-- end Resend Fulfillment Modal -->
+                                <?php if($order->checkCancelEligibility()): ?>
+                                <!-- Cancel Modal -->
+                                <div class="modal fade" id="CancelOrder" tabindex="-1" role="dialog" aria-labelledby="CancelOrder">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                                <h4 class="modal-title" id="myModalLabel">Are you sure?</h4>
+                                            </div>
+                                            <div class="modal-body">
+                                                <strong class="text-danger">This will permanently cancel your order</strong>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                                                <a href="<?= $_SERVER['PHP_SELF']."?action=cancel" ?>" class="btn btn-danger">Confirm</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- end Cancel Modal -->
+                                <?php endif; ?>
 					<?php endif; ?>
+			    <?php if ($order->formdata->order_status == 'Queued'):?>
+            <div class='panel panel-primary'>
+              <div class='panel-body'>
+                <p>Your order is currently being queued by the Certificate Authority. Your order needs to be reviewed by a member of the Authentication team. This is normally complete within a few hours on a working day. This can be for a number of reasons including:</p>
+                <ul>
+					<li>The website is not live at time of order or has a holding page</li>
+					<li>Suspicious or incomplete whois data</li>
+					<li>Contact details are suspicious or match certain criteria</li>
+					<li>Domain name matches certain criteria</li>
+					<li>Web site content matches certain criteria</li>
+					<li>Domain name is the same as a previously cancelled order</li>
+					<li>Order has been randomly flagged</li>
+				</ul>
+
+                <p>Please note: Cancelling the order and placing a new order for the same domain will still cause a manual review.</p>
+              </div>
+            </div>
+
+            <div class="panel panel-default">
+              <div class="panel-body">
+                <a href="<?= $_SERVER['PHP_SELF'] ?>?forcerefresh" class="btn btn-success">
+                  Refresh
+                </a>
+                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#CancelOrder">
+                  Cancel Order
+                </button>
+              </div>
+            </div>
+
+            <!-- Cancel Modal -->
+            <div class="modal fade" id="CancelOrder" tabindex="-1" role="dialog" aria-labelledby="CancelOrder">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Are you sure?</h4>
+                  </div>
+                  <div class="modal-body">
+                    <strong class="text-danger">This will permanently cancel your order</strong>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <a href="<?= $_SERVER['PHP_SELF']."?action=cancel" ?>" class="btn btn-danger">Confirm</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- end Cancel Modal -->
+	      <?php endif;?>
 					<?php if ($order->formdata->order_status == 'Awaiting Provider Approval'): ?>
 						<div class='panel panel-primary'>
 							<div class='panel-body'>
@@ -374,13 +456,15 @@ if (isset($_GET['action']) && $_GET['action'] != '') {
 							<?php endif;?>
 							<?php if ($order->formdata->dv_auth_method == 'DNS'): ?>
 								<div class="panel panel-primary">
-									<div class="panel-body">
-										<p>
-											Your order has been configured but we are waiting for the domain to be approved. You need to create a TXT record on your DNS server with the following:
-										</p>
-										<p><?=$order->formdata->dv_auth_dns_string;?></p>
-										<p>Check if your DNS TXT is set-up <a target="_blank" href="http://www.dnsstuff.com/tools#dnsLookup|type=domain&&value=<?=$order->formdata->domain_name;?>&&recordType=TXT&&displaytype=pretty">Click Here</a></p>
-									</div>
+                  <div class="panel-body">
+                    <p>
+                      Your order has been configured but we are waiting for the domain to be approved. You need to create a <?= $order->formdata->dv_auth_dns_type; ?> record on your DNS server with the following:
+                    </p>
+                    <p>Name:</p>
+                    <pre><?= $order->formdata->dv_auth_dns_name; ?></pre>
+                    <p>Value:</p>
+                    <pre><?=$order->formdata->dv_auth_dns_string;?></pre>
+                  </div>
 								</div>
 
 
@@ -409,15 +493,25 @@ if (isset($_GET['action']) && $_GET['action'] != '') {
 								        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 								        <h4 class="modal-title" id="myModalLabel">Are you sure?</h4>
 								      </div>
-								      <div class="modal-body">
-								        <strong>Switch your authentication to Email only</strong>
-								        <br>
-								        <strong class="text-danger">You will be unable to switch back</strong>
-								      </div>
-								      <div class="modal-footer">
-								        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-								        <a href="<?= $_SERVER['PHP_SELF']."?action=change_auth" ?>" class="btn btn-primary">Confirm</a>
-								      </div>
+                      <form action="<?= $_SERVER['PHP_SELF'] ?>" method="GET">
+                        <input type="hidden" name="action" value="change_auth">
+                        <div class="modal-body">
+                          <strong>Switch your authentication to Email only</strong>
+                          <br>
+                          <strong class="text-danger">You will be unable to switch back</strong>
+                          <div class='approver-list'>
+                            <?php foreach ($order->formdata->approver_list as $value): ?>
+                              <div class="radio">
+                                <label><input type="radio" name="email" required="" value="<?=$value['email'];?>"><?=$value['email'];?></label>
+                              </div>
+						                 <?php endforeach;?>
+                          </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                          <input type="submit" class="btn btn-primary" value="Change">
+                        </div>
+                      </form>
 								    </div>
 								  </div>
 								</div>
@@ -465,15 +559,15 @@ if (isset($_GET['action']) && $_GET['action'] != '') {
 
 							<?php endif;?>
 							<?php if ($order->formdata->dv_auth_method == 'FILE'): ?>
-								<div class="panel panel-primary">
-									<div class="panel-body">
-										<p>
-											Your order has been configured but we are waiting for the domain to be approved. You need to create a file on your domain with the filename and content specified below:
-										</p>
-										<p><strong>File Name: </strong>/.well-known/pki-validation/fileauth.txt</p>
-										<p><strong>File Contents: </strong><?=$order->formdata->dv_auth_file_contents;?></p>
-									</div>
-								</div>
+                <div class="panel panel-primary">
+                  <div class="panel-body">
+                    <p>Your order has been configured but we are waiting for the domain to be approved. You need to create a file on your domain with the filename and content specified below:</p>
+                        <p><strong>File Name: </strong></p>
+                        <pre><?= $order->formdata->dv_auth_file_name;?></pre>
+                    <p><strong>File Contents: </strong></p>
+                    <pre><?=$order->formdata->dv_auth_file_contents;?></pre>
+                  </div>
+                </div>
 
 
 
@@ -494,27 +588,37 @@ if (isset($_GET['action']) && $_GET['action'] != '') {
 									</button>
 									</div>
 								</div>
-								<!-- SwitchAuth Modal -->
-								<div class="modal fade" id="SwitchAuth" tabindex="-1" role="dialog" aria-labelledby="SwitchAuth">
-								  <div class="modal-dialog" role="document">
-								    <div class="modal-content">
-								      <div class="modal-header">
-								        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-								        <h4 class="modal-title" id="myModalLabel">Are you sure?</h4>
-								      </div>
-								      <div class="modal-body">
-								        <strong>Switch your authentication to Email only</strong>
-								        <br>
-								        <strong class="text-danger">You will be unable to switch back</strong>
-								      </div>
-								      <div class="modal-footer">
-								        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-								        <a href="<?= $_SERVER['PHP_SELF']."?action=change_auth" ?>" class="btn btn-primary">Confirm</a>
-								      </div>
-								    </div>
-								  </div>
-								</div>
-								<!-- end SwitchAuth Modal -->
+                <!-- SwitchAuth Modal -->
+                <div class="modal fade" id="SwitchAuth" tabindex="-1" role="dialog" aria-labelledby="SwitchAuth">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">Are you sure?</h4>
+                      </div>
+                      <form action="<?= $_SERVER['PHP_SELF'] ?>" method="GET">
+                        <input type="hidden" name="action" value="change_auth">
+                        <div class="modal-body">
+                          <strong>Switch your authentication to Email only</strong>
+                          <br>
+                          <strong class="text-danger">You will be unable to switch back</strong>
+                          <div class='approver-list'>
+							  <?php foreach ($order->formdata->approver_list as $value): ?>
+                                <div class="radio">
+                                  <label><input type="radio" name="email" required="" value="<?=$value['email'];?>"><?=$value['email'];?></label>
+                                </div>
+							  <?php endforeach;?>
+                          </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                          <input type="submit" class="btn btn-primary" value="Change">
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+                <!-- end SwitchAuth Modal -->
 
 								<!-- PollAuth Modal -->
 								<div class="modal fade" id="PollAuth" tabindex="-1" role="dialog" aria-labelledby="PollAuth">
@@ -614,12 +718,14 @@ if (isset($_GET['action']) && $_GET['action'] != '') {
 												<p><?= $order->formdata->expiry_date ?></p>
 											</div>
 										</div>
-										<div class="row">
-											<div class="col-md-7">
-												<h4>PKCS7</h4>
-												<pre><?= (isset($order->formdata->pkcs7)? $order->formdata->pkcs7 :'') ?></pre>
-											</div>
-										</div>
+                    <?php if(isset($order->formdata->pkcs7)): ?>
+                      <div class="row">
+                        <div class="col-md-7">
+                          <h4>PKCS7</h4>
+                          <pre><?= (isset($order->formdata->pkcs7)? $order->formdata->pkcs7 :'') ?></pre>
+                        </div>
+                      </div>
+                    <?php endif; ?>
 									</div>
 								</div>
                 <?php if (!empty($order->formdata->ca_certs->certificate_info)):?>
@@ -831,5 +937,4 @@ if (isset($_GET['action']) && $_GET['action'] != '') {
 	<script type="text/javascript" src="js/vendor/jquery-3.1.1.min.js"></script>
 	<script type="text/javascript" src="js/vendor/bootstrap.min.js"></script>
 			<?php endif; ?>
-</body>
-</html>
+<?php include "includes/footer.php"?>

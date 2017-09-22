@@ -11,8 +11,14 @@
 	<link rel="stylesheet" type="text/css" href="css/vendor/validetta.min.css">
 	<link rel="stylesheet" href="css/main-style.css">
 	<link rel="stylesheet" href="css/user-style.css">
+	<?php  
+	include_once 'includes/headtag.php';
+	?>
 </head>
 <body>
+	<?php  
+	include_once 'includes/bodytagtop.php';
+	?>
 	<div class="container header">
 	  <?php if ($order->hasLogo()):?>
         <div class="logo-area">
@@ -28,7 +34,11 @@
 		<li><a href="/">Start</a></li>
 		<li><a href="order_type.php" class="active">Order Type</a></li>
 		<li><a href="contact_info.php" class="unlinked">Contact Information</a></li>
-		<li><a href="order_csr.php" class="unlinked">CSR</a></li>
+	  <?php if(strpos( $order->formdata->st_product_code,'AntiMalware')===0): ?>
+        <li><a href="order_csr.php" class="unlinked">Domain Name</a></li>
+	  <?php else:?>
+        <li><a href="order_csr.php" class="unlinked">CSR</a></li>
+	  <?php endif;?>
 		<li><a href="order_organisation.php" class="unlinked">Organisation</a></li>
 		<li><a href="order_review.php" class="unlinked">Review</a></li>
 	</ol>
@@ -82,9 +92,4 @@
 			</div>
 		</form>
 	</div>
-	<script type="text/javascript" src="js/vendor/jquery-3.1.1.min.js"></script>
-	<script type="text/javascript" src="js/vendor/bootstrap.min.js"></script>
-	<script type="text/javascript" src="js/vendor/validetta.min.js"></script>
-	<script type="text/javascript" src="js/main.js" ></script>
-</body>
-</html>
+<?php include "includes/footer.php"?>

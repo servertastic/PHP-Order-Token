@@ -12,8 +12,14 @@ include_once 'includes/header.php';
   <link rel="stylesheet" type="text/css" href="css/vendor/validetta.min.css">
   <link rel="stylesheet" href="css/main-style.css">
   <link rel="stylesheet" href="css/user-style.css">
+	<?php  
+	include_once 'includes/headtag.php';
+	?>
 </head>
 <body>
+	<?php  
+	include_once 'includes/bodytagtop.php';
+	?>
 <div class="container header">
 	<?php if ($order->hasLogo()):?>
       <div class="logo-area">
@@ -176,9 +182,9 @@ include_once 'includes/header.php';
                 class="form-control"
                 data-validetta="<?= $order->fieldHasRequired('org_business_category') ?>"
             >
-                <?php foreach ($order->business_categories as $value): ?>
+                <?php foreach ($order->getSelectData('org_business_category') as $key=>$value): ?>
                   <option
-                      value="<?= $value['code'] ?>" <?= $order->isSelected('org_business_category', $value['code']) ?>><?= $value['name'] ?></option>
+                      value="<?= $value ?>" <?= $order->isSelected('org_business_category', $value) ?>><?= $value ?></option>
                 <?php endforeach ?>
             </select>
           </div>
@@ -423,9 +429,4 @@ include_once 'includes/header.php';
     </div>
   </form>
 </div>
-<script type="text/javascript" src="js/vendor/jquery-3.1.1.min.js"></script>
-<script type="text/javascript" src="js/vendor/bootstrap.min.js"></script>
-<script type="text/javascript" src="js/vendor/validetta.min.js"></script>
-<script type="text/javascript" src="js/main.js"></script>
-</body>
-</html>
+<?php include "includes/footer.php"?>

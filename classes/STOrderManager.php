@@ -23,27 +23,17 @@ class STOrderManager {
 		'SmarterToolsPlatinumPackage',
 		'SmarterToolsInstallationSupport'
 	];
-	public $business_categories=[
-        [
-            'code'=>'b',
-            'name'=>'Private Organization',
-        ],
-        [
-            'code'=>'c',
-            'name'=>'Government Entity',
-        ],
-        [
-            'code'=>'d',
-            'name'=>' Business Entity',
-        ],
-    ];
 
 	public function __construct($order_token='', $force_review=FALSE) {
         // OPTIONS //
         // 20 minutes in seconds
         $this->timeout='1200';
         // Test mode
+        if($_SERVER['WEBSITE_ENV']=='live'){
+        $this->TEST_MODE=FALSE;
+        }else{
         $this->TEST_MODE=TRUE;
+        }
         // Logo Location
 	    // Use an absolute path from webroot
 	    $this->logoLocation = '';
@@ -53,7 +43,11 @@ class STOrderManager {
         $this->formdata=new stdClass();
 
         // use turnary to set if using test mode api or live mode api
+    	if($_SERVER['WEBSITE_ENV']=='development'){
+        $this->base_uri='https://dev-api2.servertastic.com/order/';
+        }else{
         $this->base_uri=($this->TEST_MODE ? 'https://test-api2.servertastic.com/order/' : 'https://api2.servertastic.com/order/');
+        }
         // prepare the GuzzleHTTP client with the base uri
         $this->client=new Client([
             'base_uri'=>$this->base_uri,
@@ -145,10 +139,10 @@ class STOrderManager {
                     // loop through all data and add it to the formdata session storage
                     foreach ($returned as $key=>$value) {
                         // skip over anything we dont need in the session
-                        if ($key=='success'||$key=='modifications'||$key=='order_token') {
+                        if ($key=='success'||$key=='order_token') {
                             continue;
                             // also loop through stuff that is another level deep
-                        } elseif ($key=='organisation_info'||$key=='admin_contact'||$key=='tech_contact') {
+                        } elseif ($key=='organisation_info'||$key=='admin_contact'||$key=='tech_contact'||$key=='modifications') {
                             switch ($key) {
                                 case 'organisation_info':
                                     foreach ($returned->organisation_info as $orgkey=>$orgvalue) {
@@ -172,6 +166,9 @@ class STOrderManager {
                                         $this->formdata->{'tech_contact_'.$techkey}=$techvalue;
                                     }
                                     break;
+	                            case 'modifications':
+	                            	$this->formdata->modifications = $returned->modifications->modification;
+	                            	break;
                                 default:
                                     break;
                             }
@@ -365,11 +362,13 @@ class STOrderManager {
         }
     }
 
-    public function changeAuth() {
+    public function changeAuth($email_address = false) {
+	    if ($email_address) {$this->formdata->approver_email_address = $email_address;}
         try {
             $order_cancel=$this->client->get('changeauthmethod.json', [
                 "query"=>[
                     "order_token"=>$this->formdata->order_token,
+	                "email_address"=>$this->formdata->approver_email_address
                 ],
             ]);
             if ($order_cancel->getStatusCode()=='200') {
@@ -422,6 +421,25 @@ class STOrderManager {
         } else {
             return FALSE;
         }
+    }
+
+    // only return true if the expiration date is bigger than now and return false any time Order Completed is not set
+    public function checkCancelEligibility() {
+        if (!isset($this->formdata->modifications)) {
+            return false;
+        }
+        $modifications = $this->formdata->modifications;
+        foreach( $modifications as $modification ) {
+            if ($modification->event_name==='Order Completed') {
+                $time = new DateTime($modification->timestamp);
+                $expiration = $time->modify('+30 days');
+                $now = new DateTime();
+                if ($expiration>$now) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public function fieldIsAllowed($fieldname) {
@@ -537,6 +555,8 @@ class STOrderManager {
                     $this->formdata->domain_or_csr='domain';
                 } elseif ($formdata[$key]=='Supply CSR') {
                     $this->formdata->domain_or_csr='csr';
+                } elseif (strpos( $this->formdata->st_product_code, 'AntiMalware')==0) {
+	                $this->formdata->domain_or_csr='domain';
                 }
             } elseif ($key=='csr') {
                 $this->formdata->csr=$value;
@@ -632,6 +652,17 @@ class STOrderManager {
 		}
 		return FALSE;
     }
+
+	public function genFooterData() {
+		$html = "<hr><div class='container'>
+	<div class=''>
+	  <p class='order-token'>Order Token: <span>{$this->formdata->order_token}</span></p>
+	  <p class='order-reference'>Order Reference: <span>{$this->formdata->reseller_unique_reference}</span></p>
+      <a href='/index.php?clearsession' class='btn btn-primary'>Clear Session</a>
+	</div>
+</div><br>";
+		return $html;
+	}
 
     private function placeOrder() {
 		if ($this->isSmarterTools()) {

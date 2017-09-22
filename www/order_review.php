@@ -12,8 +12,14 @@ include_once 'includes/header.php';
   <link rel="stylesheet" href="css/vendor/bootstrap.css">
   <link rel="stylesheet" href="css/main-style.css">
   <link rel="stylesheet" href="css/user-style.css">
+	<?php  
+	include_once 'includes/headtag.php';
+	?>
 </head>
 <body>
+	<?php  
+	include_once 'includes/bodytagtop.php';
+	?>
 <div class="container header">
 	<?php if ($order->hasLogo()):?>
       <div class="logo-area">
@@ -32,7 +38,11 @@ include_once 'includes/header.php';
   <?php else:?>
     <li><a href="order_type.php">Order Type</a></li>
     <li><a href="contact_info.php">Contact Information</a></li>
-    <li><a href="order_csr.php">CSR</a></li>
+	  <?php if(strpos( $order->formdata->st_product_code,'AntiMalware')===0): ?>
+      <li><a href="order_csr.php" class="">Domain Name</a></li>
+	  <?php else:?>
+      <li><a href="order_csr.php" class="">CSR</a></li>
+	  <?php endif;?>
     <li><a href="order_organisation.php">Organisation</a></li>
   <?php endif; ?>
   <li><a href="order_review.php" class="active">Review</a></li>
@@ -482,8 +492,4 @@ include_once 'includes/header.php';
     </div>
   </form>
 </div>
-<script type="text/javascript" src="js/vendor/jquery-3.1.1.min.js"></script>
-<script type="text/javascript" src="js/vendor/bootstrap.min.js"></script>
-<script type="text/javascript" src="js/main.js"></script>
-</body>
-</html>
+<?php include "includes/footer.php"?>

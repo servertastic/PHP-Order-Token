@@ -1,6 +1,9 @@
 <?php
 	include_once 'includes/header.php';
-
+  if (isset($_GET['clearsession'])) {
+    session_destroy();
+    header('Location: /');
+  }
 	// check if the page has been submitted
 	if (isset($_POST['indexsub'])) {
 		// start to build the form
@@ -61,8 +64,14 @@
 	<link rel="stylesheet" type="text/css" href="css/vendor/validetta.min.css">
 	<link rel="stylesheet" href="css/main-style.css">
 	<link rel="stylesheet" href="css/user-style.css">
+	<?php  
+	include_once 'includes/headtag.php';
+	?>
 </head>
 <body>
+	<?php  
+	include_once 'includes/bodytagtop.php';
+	?>
 	<div class="container header">
 	<?php if ($_SERVER['HTTP_HOST']=='order.servertastic.com'){?>
 	<div class="logo-area">
@@ -122,9 +131,4 @@
 			</div>
 		</form>
 	</div>
-	<script type="text/javascript" src="js/vendor/jquery-3.1.1.min.js"></script>
-	<script type="text/javascript" src="js/vendor/bootstrap.min.js"></script>
-	<script type="text/javascript" src="js/vendor/validetta.min.js"></script>
-	<script type="text/javascript" src="js/main.js" ></script>
-</body>
-</html>
+<?php include "includes/footer.php"?>
